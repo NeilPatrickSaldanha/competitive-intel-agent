@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IntelAgent — AI Intelligence System</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000000;
+      --surface: #0a0a0a;
+      --surface-2: #111111;
+      --surface-3: #1a1a1a;
+      --border: rgba(255,255,255,0.08);
+      --border-active: rgba(255,255,255,0.2);
+      --text-primary: #f5f5f7;
+      --text-secondary: #86868b;
+      --text-tertiary: #424245;
+      --accent: #2997ff;
+      --accent-glow: rgba(41,151,255,0.15);
+      --success: #30d158;
+      --success-glow: rgba(48,209,88,0.15);
+      --cite-bg: rgba(41,151,255,0.1);
+      --cite-border: rgba(41,151,255,0.25);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box;outline: none; }
+
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .ambient {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .ambient-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.12;
+    }
+
+    .orb-1 {
+      width: 600px; height: 600px;
+      background: #2997ff;
+      top: -200px; left: -100px;
+      animation: float1 12s ease-in-out infinite;
+    }
+
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: #5e5ce6;
+      top: 30%; right: -100px;
+      animation: float2 15s ease-in-out infinite;
+    }
+
+    .orb-3 {
+      width: 300px; height: 300px;
+      background: #30d158;
+      bottom: 10%; left: 20%;
+      opacity: 0.06;
+      animation: float3 18s ease-in-out infinite;
+    }
+
+    @keyframes float1 {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(40px, 60px); }
+    }
+    @keyframes float2 {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-30px, 40px); }
+    }
+    @keyframes float3 {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(50px, -30px); }
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 100px 24px 80px;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 28px;
+    }
+
+    .eyebrow-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: blink 2s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(40px, 6vw, 64px);
+      font-weight: 400;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--text-secondary);
+    }
+
+    .hero-sub {
+      font-size: 17px;
+      color: var(--text-secondary);
+      max-width: 460px;
+      margin: 0 auto;
+      line-height: 1.65;
+      font-weight: 300;
+    }
+
+    .search-wrap { margin-bottom: 56px; }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 6px 6px 6px 20px;
+      gap: 12px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .search-box:focus-within {
+      border-color: var(--border-active);
+      box-shadow: 0 0 0 4px rgba(41,151,255,0.08);
+    }
+
+    .search-icon {
+      color: var(--text-tertiary);
+      flex-shrink: 0;
+      font-size: 16px;
+    }
+
+    input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--text-primary);
+      padding: 10px 0;
+    }
+
+    input::placeholder { color: var(--text-tertiary); }
+
+    .run-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .run-btn:hover { background: #0077ed; transform: translateY(-1px); }
+    .run-btn:active { transform: translateY(0); }
+    .run-btn:disabled {
+      background: var(--surface-3);
+      color: var(--text-tertiary);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .pipeline-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .pipeline {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-bottom: 48px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      padding: 4px;
+    }
+
+    .agent-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .agent-row::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: transparent;
+      transition: background 0.4s;
+    }
+
+    .agent-row.active::before { background: rgba(41,151,255,0.06); }
+    .agent-row.complete::before { background: rgba(48,209,88,0.04); }
+
+    .agent-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.4s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .agent-row.active .agent-icon {
+      background: rgba(41,151,255,0.1);
+      border-color: rgba(41,151,255,0.3);
+    }
+
+    .agent-row.complete .agent-icon {
+      background: rgba(48,209,88,0.1);
+      border-color: rgba(48,209,88,0.3);
+    }
+
+    .icon-default, .icon-active, .icon-done {
+      position: absolute;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    .icon-default { opacity: 0.3; }
+    .icon-active { opacity: 0; }
+    .icon-done { opacity: 0; }
+
+    .agent-row.active .icon-default { opacity: 0; }
+    .agent-row.active .icon-active { opacity: 1; }
+    .agent-row.complete .icon-default { opacity: 0; }
+    .agent-row.complete .icon-active { opacity: 0; }
+    .agent-row.complete .icon-done { opacity: 1; }
+
+    .agent-row.active .agent-icon::after {
+      content: '';
+      position: absolute;
+      top: -100%;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, transparent, rgba(41,151,255,0.4), transparent);
+      animation: scan 1.5s ease-in-out infinite;
+    }
+
+    @keyframes scan {
+      0% { top: -100%; }
+      100% { top: 200%; }
+    }
+
+    .agent-info { flex: 1; min-width: 0; }
+
+    .agent-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: color 0.3s;
+      margin-bottom: 2px;
+    }
+
+    .agent-row.active .agent-name,
+    .agent-row.complete .agent-name { color: var(--text-primary); }
+
+    .agent-status-text {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      transition: color 0.3s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .agent-row.active .agent-status-text { color: var(--accent); }
+    .agent-row.complete .agent-status-text { color: var(--success); }
+
+    .agent-progress {
+      width: 60px;
+      height: 2px;
+      background: var(--surface-3);
+      border-radius: 1px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .agent-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      border-radius: 1px;
+    }
+
+    .agent-row.active .agent-progress-fill {
+      animation: progress-indeterminate 1.5s ease-in-out infinite;
+    }
+
+    .agent-row.complete .agent-progress-fill {
+      width: 100%;
+      background: var(--success);
+      animation: none;
+    }
+
+    @keyframes progress-indeterminate {
+      0% { width: 0%; margin-left: 0%; }
+      50% { width: 70%; margin-left: 15%; }
+      100% { width: 0%; margin-left: 100%; }
+    }
+
+    .output-wrap {
+      display: none;
+      animation: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .output-wrap.visible { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .output-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .output-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .output-tag {
+      font-size: 11px;
+      color: var(--success);
+      background: var(--success-glow);
+      border: 1px solid rgba(48,209,88,0.2);
+      padding: 4px 10px;
+      border-radius: 100px;
+      font-weight: 500;
+    }
+
+    .output-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .brief-section {
+      padding: 28px 36px;
+      border-bottom: 1px solid var(--border);
+      animation: fadeUp 0.4s ease forwards;
+    }
+
+    .brief-section:last-child { border-bottom: none; }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #f5f5f7;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Bullet list styling */
+    .brief-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .brief-list li {
+      display: flex;
+      gap: 12px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #ababab;
+    }
+
+    .brief-list li::before {
+      content: '·';
+      color: var(--accent);
+      font-size: 20px;
+      line-height: 1.4;
+      flex-shrink: 0;
+    }
+
+    /* Verdict prose */
+    .verdict-text {
+      font-size: 15px;
+      line-height: 1.8;
+      color: #c7c7cc;
+      font-style: italic;
+    }
+
+    /* Inline citation pill */
+    .cite-pill {
+      display: inline-flex;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--cite-bg);
+      border: 1px solid var(--cite-border);
+      padding: 1px 7px;
+      border-radius: 100px;
+      margin-left: 4px;
+      text-decoration: none;
+      vertical-align: middle;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .cite-pill:hover {
+      background: rgba(41,151,255,0.2);
+      border-color: rgba(41,151,255,0.5);
+    }
+
+    /* Sources section */
+    .sources-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .source-chip {
+      font-size: 12px;
+      color: var(--accent);
+      background: var(--accent-glow);
+      border: 1px solid rgba(41,151,255,0.2);
+      padding: 5px 12px;
+      border-radius: 100px;
+      text-decoration: none;
+      transition: all 0.2s;
+      white-space: nowrap;
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+    }
+
+    .source-chip:hover {
+      background: rgba(41,151,255,0.2);
+      border-color: rgba(41,151,255,0.4);
+    }
+
+    /* Copy button */
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      background: rgba(14, 199, 199, 0.79);
+    border: 1px solid rgba(41,151,255,0.4);
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .copy-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--border-active);
+    }
+
+    .copy-btn.copied {
+      color: var(--success);
+      border-color: rgba(48,209,88,0.3);
+    }
+  </style>
+</head>
+<body>
+
+<div class="ambient">
+  <div class="ambient-orb orb-1"></div>
+  <div class="ambient-orb orb-2"></div>
+  <div class="ambient-orb orb-3"></div>
+</div>
+
+<div class="page">
+
+  <div class="hero">
+    <div class="eyebrow">
+      <div class="eyebrow-dot"></div>
+      Multi-Agent AI System
+    </div>
+    <h1>Company intelligence,<br/><em>in seconds.</em></h1>
+    <p class="hero-sub">Four specialized AI agents research any company in real time and deliver a structured brief you can actually use.</p>
+  </div>
+
+  <div class="search-wrap">
+    <div class="search-box">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="companyInput" placeholder="Enter a company name..." autocomplete="off"/>
+      <button class="run-btn" id="analyzeBtn" onclick="analyze()">Analyze</button>
+    </div>
+  </div>
+
+  <div class="pipeline-label">Agent Pipeline</div>
+  <div class="pipeline">
+    <div class="agent-row" id="card-orchestrator">
+      <div class="agent-icon">
+        <span class="icon-default">◈</span>
+        <span class="icon-active">◈</span>
+        <span class="icon-done">◈</span>
+      </div>
+      <div class="agent-info">
+        <div class="agent-name">Orchestrator</div>
+        <div class="agent-status-text" id="status-orchestrator">Idle</div>
+      </div>
+      <div class="agent-progress"><div class="agent-progress-fill"></div></div>
+    </div>
+    <div class="agent-row" id="card-research">
+      <div class="agent-icon">
+        <span class="icon-default">◎</span>
+        <span class="icon-active">◎</span>
+        <span class="icon-done">◎</span>
+      </div>
+      <div class="agent-info">
+        <div class="agent-name">Research Agent</div>
+        <div class="agent-status-text" id="status-research">Waiting</div>
+      </div>
+      <div class="agent-progress"><div class="agent-progress-fill"></div></div>
+    </div>
+    <div class="agent-row" id="card-news">
+      <div class="agent-icon">
+        <span class="icon-default">◉</span>
+        <span class="icon-active">◉</span>
+        <span class="icon-done">◉</span>
+      </div>
+      <div class="agent-info">
+        <div class="agent-name">News Agent</div>
+        <div class="agent-status-text" id="status-news">Waiting</div>
+      </div>
+      <div class="agent-progress"><div class="agent-progress-fill"></div></div>
+    </div>
+    <div class="agent-row" id="card-sentiment">
+      <div class="agent-icon">
+        <span class="icon-default">◐</span>
+        <span class="icon-active">◐</span>
+        <span class="icon-done">◐</span>
+      </div>
+      <div class="agent-info">
+        <div class="agent-name">Sentiment Agent</div>
+        <div class="agent-status-text" id="status-sentiment">Waiting</div>
+      </div>
+      <div class="agent-progress"><div class="agent-progress-fill"></div></div>
+    </div>
+    <div class="agent-row" id="card-synthesis">
+      <div class="agent-icon">
+        <span class="icon-default">◇</span>
+        <span class="icon-active">◇</span>
+        <span class="icon-done">◇</span>
+      </div>
+      <div class="agent-info">
+        <div class="agent-name">Synthesis Agent</div>
+        <div class="agent-status-text" id="status-synthesis">Waiting</div>
+      </div>
+      <div class="agent-progress"><div class="agent-progress-fill"></div></div>
+    </div>
+  </div>
+
+  <div class="output-wrap" id="outputWrap">
+    <div class="output-header">
+      <div class="output-label">Intelligence Brief</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button class="copy-btn" id="copyBtn" onclick="copyBrief()">⎘ Copy Brief</button>
+        <div class="output-tag">Analysis Complete</div>
+      </div>
+    </div>
+    <div class="output-card">
+      <div id="outputBody"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const agentMap = {
+    "Orchestrator": "orchestrator",
+    "Research Agent": "research",
+    "News Agent": "news",
+    "Sentiment Agent": "sentiment",
+    "Synthesis Agent": "synthesis"
+  };
+
+  let sourcesIndex = [];
+
+  function resetUI() {
+    document.getElementById("outputWrap").classList.remove("visible");
+    document.getElementById("outputBody").innerHTML = "";
+    sourcesIndex = [];
+    Object.values(agentMap).forEach(key => {
+      const card = document.getElementById(`card-${key}`);
+      card.classList.remove("active", "complete");
+      document.getElementById(`status-${key}`).textContent = key === "orchestrator" ? "Idle" : "Waiting";
+    });
+  }
+
+  function setActive(agent, message) {
+    const key = agentMap[agent];
+    if (!key) return;
+    document.getElementById(`card-${key}`).classList.add("active");
+    document.getElementById(`card-${key}`).classList.remove("complete");
+    document.getElementById(`status-${key}`).textContent = message;
+  }
+
+  function setComplete(agent) {
+    const key = agentMap[agent];
+    if (!key) return;
+    document.getElementById(`card-${key}`).classList.remove("active");
+    document.getElementById(`card-${key}`).classList.add("complete");
+    document.getElementById(`status-${key}`).textContent = "Complete";
+  }
+
+  function parseSources(text) {
+    const sources = [];
+    const regex = /\[(.+?)\]\((https?:\/\/[^\)]+)\)/g;
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      sources.push({ title: match[1], url: match[2] });
+    }
+    return sources;
+  }
+
+  function resolveCitations(text) {
+    return text.replace(/\{\{(\d+)\}\}/g, (_, num) => {
+      const idx = parseInt(num) - 1;
+      const source = sourcesIndex[idx];
+      if (!source) return '';
+      const shortTitle = source.title.length > 25 ? source.title.slice(0, 25) + '…' : source.title;
+      return `<a href="${source.url}" target="_blank" class="cite-pill">${shortTitle}</a>`;
+    });
+  }
+
+  function renderBullets(text) {
+    const lines = text.trim().split('\n').filter(l => l.trim());
+    return `<ul class="brief-list">${lines.map(line => {
+      const clean = line.replace(/^[-•*]\s*/, '').trim();
+      return `<li>${resolveCitations(clean)}</li>`;
+    }).join('')}</ul>`;
+  }
+
+  function renderBrief(text) {
+    // Extract sources first to build index
+    const sourcesMatch = text.match(/## Sources\n([\s\S]*?)$/m);
+    if (sourcesMatch) {
+      sourcesIndex = parseSources(sourcesMatch[1]);
+    }
+
+    const sections = text.split(/^## /m).filter(Boolean);
+    let html = '';
+
+    sections.forEach(section => {
+      const lines = section.trim().split('\n');
+      const title = lines[0].trim();
+      const body = lines.slice(1).join('\n').trim();
+      if (!body) return;
+
+      html += `<div class="brief-section">`;
+      html += `<div class="section-title">${title}</div>`;
+
+      if (title === 'Sources') {
+        html += '<div class="sources-grid">';
+        sourcesIndex.forEach(s => {
+          const shortTitle = s.title.length > 40 ? s.title.slice(0, 40) + '…' : s.title;
+          html += `<a href="${s.url}" target="_blank" class="source-chip" title="${s.title}">${shortTitle}</a>`;
+        });
+        html += '</div>';
+      } else if (title === 'Analyst Verdict') {
+        const clean = resolveCitations(body.replace(/\n/g, ' '));
+        html += `<div class="verdict-text">${clean}</div>`;
+      } else {
+        html += renderBullets(body);
+      }
+
+      html += '</div>';
+    });
+
+    return html;
+  }
+
+  function copyBrief() {
+    const body = document.getElementById("outputBody");
+    const text = body.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById("copyBtn");
+      btn.textContent = "✓ Copied";
+      btn.classList.add("copied");
+      setTimeout(() => {
+        btn.textContent = "⎘ Copy Brief";
+        btn.classList.remove("copied");
+      }, 2000);
+    });
+  }
+
+  async function analyze() {
+    const company = document.getElementById("companyInput").value.trim();
+    if (!company) return;
+
+    resetUI();
+    document.getElementById("analyzeBtn").disabled = true;
+    document.getElementById("analyzeBtn").textContent = "Running...";
+
+    const response = await fetch(`/analyze/${encodeURIComponent(company)}`);
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value);
+      const lines = chunk.split("\n").filter(l => l.startsWith("data: "));
+
+      for (const line of lines) {
+        try {
+          const data = JSON.parse(line.replace("data: ", ""));
+          const { agent, status, message } = data;
+
+          if (status === "running" || status === "starting") setActive(agent, message);
+
+          if (status === "done") {
+            setComplete(agent);
+            if (agent === "Synthesis Agent") {
+              const wrap = document.getElementById("outputWrap");
+              wrap.classList.add("visible");
+              document.getElementById("outputBody").innerHTML = renderBrief(message);
+              setTimeout(() => {
+                wrap.scrollIntoView({ behavior: "smooth", block: "start" });
+              }, 150);
+            }
+          }
+
+          if (status === "complete") {
+            setComplete(agent);
+            document.getElementById("analyzeBtn").disabled = false;
+            document.getElementById("analyzeBtn").textContent = "Analyze";
+          }
+        } catch(e) {}
+      }
+    }
+  }
+
+  document.getElementById("companyInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") analyze();
+  });
+</script>
+
+</body>
+</html>
